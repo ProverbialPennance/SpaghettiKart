@@ -51,5 +51,31 @@
           };
         }
       );
+
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        {
+          default =
+            let
+              spaghetti-kart = pkgs.callPackage ./nix/package.nix {
+                lus = lus;
+                flake_input = self;
+              };
+            in
+            pkgs.mkShell {
+              nativeBuildInputs = [ ] ++ spaghetti-kart.nativeBuildInputs;
+
+              buildInputs = [ ] ++ spaghetti-kart.buildInputs;
+
+              cmakeFlags = spaghetti-kart.cmakeFlags;
+            };
+        }
+      );
     };
 }
