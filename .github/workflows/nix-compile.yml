@@ -1,0 +1,42 @@
+name: Nix(OS) Validation
+
+on:
+  pull_request:
+    branches: ["*"]
+  push:
+    branches: ["*"]
+
+  workflow_dispatch:
+
+# TODO: matrix for darwin/MacOS?
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
+      - uses: DeterminateSystems/nix-installer-action@v19
+        with:
+          diagnostic-endpoint: ""
+          extra-conf: |
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+            substituters = https://cache.nixos.org/
+      # TODO: set up HarbourMasters binary cache and token
+      # - uses: cachix/cachix-action@v16
+      #   with:
+      #     name: harbour-masters
+      #     authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Run `nix build`
+        run: |
+          set -euxo pipefail
+          nix flake archive --json | jq -r '.path,(.inputs|to_entries[].value.path)' \
+          # | cachix push harbour-masters
+          nix build --show-trace --no-link --print-out-paths \
+          # | cachix push harbour-masters

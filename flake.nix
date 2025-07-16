@@ -21,7 +21,6 @@
       # TODO: darwin/MacOS support?
       systems = [
         "x86_64-linux"
-        "aarch64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
     in
