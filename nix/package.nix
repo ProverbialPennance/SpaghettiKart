@@ -113,9 +113,9 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "spaghetti-kart";
-  version = "git" + (if flake_input ? rev then "+${flake_input.rev}" else "");
+  version = "git" + (if flake_input ? shortRev then "+${flake_input.shortRev}" else "");
 
-  src = ../.;
+  src = builtins.toPath flake_input;
 
   patches = [
     ./no-git-execute.patch
@@ -197,6 +197,8 @@ stdenv.mkDerivation (finalAttrs: {
     cp ${stb_impl} ./stb/${stb_impl.name}
     substituteInPlace libultraship/cmake/dependencies/common.cmake \
       --replace-fail "\''${STB_DIR}" "$(readlink -f ./stb)"
+
+    echo "git-${builtins.toString flake_input.revCount}-${flake_input.shortRev}" > PROJECT_VERSION
   '';
 
   postBuild = ''
