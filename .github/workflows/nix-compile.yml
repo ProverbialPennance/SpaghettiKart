@@ -38,5 +38,5 @@ jobs:
           set -euxo pipefail
           nix flake archive --json | jq -r '.path,(.inputs|to_entries[].value.path)' \
           # | cachix push harbour-masters
-          nix build --show-trace --no-link --print-out-paths \
+          nix build --show-trace --print-build-logs --no-link --print-out-paths \
           # | cachix push harbour-masters
